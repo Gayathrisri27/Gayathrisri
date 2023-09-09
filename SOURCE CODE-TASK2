@@ -1,0 +1,65 @@
+# Setting Up the Backend:
+
+First, set up a Node.js project and install the necessary dependencies:
+
+bash
+
+npm init -y
+npm install express cors multer
+# Create a Basic Backend:
+
+Create a basic Node.js and Express server with routes for image uploading and fetching. This code serves as a starting point:
+
+javascript
+
+const express = require("express");
+const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+
+const app = express();
+const port = 3001;
+
+app.use(cors());
+app.use(express.json());
+
+// Set up multer for handling file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // Destination folder for uploaded images
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix =
+      Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, uniqueSuffix + ext);
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// Temporary array to store uploaded images
+const uploadedImages = [];
+
+// Image upload route
+app.post("/upload", upload.single("image"), (req, res) => {
+  const { title, description } = req.body;
+  const imageUrl = `/uploads/${req.file.filename}`;
+
+  // Save image details to a database or storage service like AWS S3
+  // In this example, we'll store it in the 'uploadedImages' array temporarily
+  uploadedImages.push({ title, description, imageUrl });
+
+  res.status(201).json({ message: "Image uploaded successfully" });
+});
+
+// Image fetching route
+app.get("/images", (req, res) => {
+  // Retrieve image details from your database or storage service
+  // In this example, we're returning the images stored in 'uploadedImages'
+  res.json(uploadedImages);
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
