@@ -1,0 +1,89 @@
+#- Task 1-PYTHON CODE
+    
+    #Let's say there are tasks that are to be done daily, these tasks can be defined by the user by adding tasks to the daily task list. As a user, one should be able to record the tasks that are completed and view the % of tasks completed on a daily basis.  We would need
+    
+    #1. Ability to add/update daily tasks.
+    #2. Create daily updates of the tasks by marking them as completed.
+    #3. View % of tasks completed on each date
+    #4. Delete the task!
+
+
+class Task:
+    def __init__(self, date, text, completed=False):
+        self.date = date
+        self.text = text
+        self.completed = completed
+
+class DailyTaskTracker:
+    def __init__(self):
+        self.tasks = []
+        self.selected_date = None
+
+    def add_or_update_task(self, text):
+        if text:
+            existing_task = next(
+                (task for task in self.tasks if task.date == self.selected_date and task.text == text), None
+            )
+            if existing_task:
+                existing_task.text = text
+            else:
+                self.tasks.append(Task(self.selected_date, text))
+
+    def mark_task_as_completed(self, index):
+        self.tasks[index].completed = True
+
+    def delete_task(self, index):
+        del self.tasks[index]
+
+    def calculate_percentage_completed(self, date):
+        completed_tasks = [task for task in self.tasks if task.date == date and task.completed]
+        total_tasks = [task for task in self.tasks if task.date == date]
+        if not total_tasks:
+            return 0.0
+        return (len(completed_tasks) / len(total_tasks)) * 100
+
+    def change_date(self, date):
+        self.selected_date = date
+
+    def display_tasks(self):
+        print(f"Date: {self.selected_date}")
+        for index, task in enumerate(self.tasks):
+            if task.date == self.selected_date:
+                status = " [X] " if task.completed else " [ ] "
+                print(f"{index + 1}.{status}{task.text}")
+
+    def run(self):
+        self.selected_date = input("Enter a date (YYYY-MM-DD): ")
+        while True:
+            print("\nOptions:")
+            print("1. Add/Update Task")
+            print("2. Mark Task as Completed")
+            print("3. Delete Task")
+            print("4. Calculate Percentage Completed")
+            print("5. Change Date")
+            print("6. Display Tasks")
+            print("7. Exit")
+            choice = input("Enter your choice: ")
+            if choice == "1":
+                task_text = input("Enter task text: ")
+                self.add_or_update_task(task_text)
+            elif choice == "2":
+                index = int(input("Enter the task number to mark as completed: ")) - 1
+                self.mark_task_as_completed(index)
+            elif choice == "3":
+                index = int(input("Enter the task number to delete: ")) - 1
+                self.delete_task(index)
+            elif choice == "4":
+                percentage = self.calculate_percentage_completed(self.selected_date)
+                print(f"Percentage of Tasks Completed: {percentage:.2f}%")
+            elif choice == "5":
+                new_date = input("Enter a new date (YYYY-MM-DD): ")
+                self.change_date(new_date)
+            elif choice == "6":
+                self.display_tasks()
+            elif choice == "7":
+                break
+
+if __name__ == "__main__":
+    daily_task_tracker = DailyTaskTracker()
+    daily_task_tracker.run()
